@@ -1,44 +1,43 @@
 const emailjs = require('emailjs-com');
+emailjs.init(process.env.EMAILJS_USER_ID);
 
-exports.handler = async (event) => {
-    console.log('Received event:', event);
+exports.handler = async (event, context) => {
+  try {
+    const body = JSON.parse(event.body);
 
-    if (event.httpMethod !== 'POST') {
-        return {
-            statusCode: 405,
-            body: 'Method Not Allowed',
-        };
+    // Log incoming request body
+    console.log('Received body:', body);
+
+    const { service_id, template_id, user_id, template_params } = body;
+
+    // Log extracted values
+    console.log('Service ID:', service_id);
+    console.log('Template ID:', template_id);
+    console.log('User ID:', user_id);
+    console.log('Template Params:', template_params);
+
+    if (!service_id || !template_id || !user_id || !template_params) {
+      console.log('Missing required parameters');
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ message: 'Invalid request body', error: 'Missing parameters' }),
+      };
     }
 
-    let templateParams;
-    try {
-        templateParams = JSON.parse(event.body);
-    } catch (error) {
-        console.error('Failed to parse request body:', error);
-        return {
-            statusCode: 400,
-            body: JSON.stringify({ message: 'Invalid request body', error }),
-        };
-    }
+    const response = await emailjs.send(service_id, template_id, template_params, user_id);
 
-    const serviceId = process.env.EMAILJS_SERVICE_ID;
-    const templateId = process.env.EMAILJS_TEMPLATE_ID;
-    const userId = process.env.EMAILJS_USER_ID;
+    // Log EmailJS response
+    console.log('EmailJS response:', response);
 
-    console.log('Using EmailJS serviceId:', serviceId, 'templateId:', templateId, 'userId:', userId);
-
-    try {
-        const response = await emailjs.send(serviceId, templateId, templateParams, userId);
-        console.log('EmailJS response:', response);
-        return {
-            statusCode: 200,
-            body: JSON.stringify({ message: 'Email sent successfully!', response }),
-        };
-    } catch (error) {
-        console.error('Failed to send email via EmailJS:', error);
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ message: 'Failed to send email', error }),
-        };
-    }
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ message: 'Email sent successfully', response }),
+    };
+  } catch (error) {
+    console.error('Error occurred:', error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ message: 'Failed to send email', error: error.toString() }),
+    };
+  }
 };

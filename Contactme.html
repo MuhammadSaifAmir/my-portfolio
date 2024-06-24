@@ -108,28 +108,30 @@
             };
           
             fetch('/.netlify/functions/sendemail', {
-              method: 'POST',
-              body: JSON.stringify({
-                service_id: process.env.EMAILJS_SERVICE_ID,
-                template_id: process.env.EMAILJS_TEMPLATE_ID,
-                user_id: process.env.EMAILJS_USER_ID,
-                template_params: templateParams
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  service_id: process.env.EMAILJS_SERVICE_ID,
+                  template_id: process.env.EMAILJS_TEMPLATE_ID,
+                  user_id: process.env.EMAILJS_USER_ID,
+                  template_params: templateParams
+                })
               })
-            })
-            .then(response => response.json())
-            .then(data => {
-              if (data.status === 'success') {
-                alert('Email sent successfully!');
-                document.getElementById('form').reset();
-              } else {
-                alert('Failed to send email. Error: ' + data.message);
-              }
-            })
-            .catch(error => {
-              console.error('Error:', error);
-              alert('Failed to send email.');
-            });
-          });
+              .then(response => response.json())
+              .then(data => {
+                if (data.message === 'Email sent successfully') {
+                  alert('Email sent successfully!');
+                  document.getElementById('form').reset();
+                } else {
+                  alert('Failed to send email. Error: ' + data.message);
+                }
+              })
+              .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to send email.');
+              });
     </script>
     
 </body>
