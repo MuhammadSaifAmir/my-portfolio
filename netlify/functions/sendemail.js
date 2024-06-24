@@ -1,43 +1,44 @@
-const emailjs = require('emailjs-com');
-emailjs.init(process.env.EMAILJS_USER_ID);
+// Import the Axios library
+const axios = require('axios');
 
-exports.handler = async (event, context) => {
-  try {
-    const body = JSON.parse(event.body);
+// Handler function for the serverless function
+exports.handler = async (event) => {
+    // Parse incoming data
+    const data = JSON.parse(event.body);
+    
+    // Construct the request payload
+    const { service_id, template_id, user_id, template_params } = data;
+    const { from_name, from_email, message, age, education, field_of_interest, programming_skills } = template_params;
 
-    // Log incoming request body
-    console.log('Received body:', body);
+    // Prepare the data for EmailJS service
+    const emailData = {
+        service_id,
+        template_id,
+        user_id,
+        template_params: {
+            from_name,
+            from_email,
+            message,
+            age,
+            education,
+            field_of_interest,
+            programming_skills
+        }
+    };
 
-    const { service_id, template_id, user_id, template_params } = body;
-
-    // Log extracted values
-    console.log('Service ID:', service_id);
-    console.log('Template ID:', template_id);
-    console.log('User ID:', user_id);
-    console.log('Template Params:', template_params);
-
-    if (!service_id || !template_id || !user_id || !template_params) {
-      console.log('Missing required parameters');
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ message: 'Invalid request body', error: 'Missing parameters' }),
-      };
+    try {
+        // Make a POST request using Axios
+        const response = await axios.post('https://api.emailjs.com/api/v1.0/email/send', emailData);
+        console.log('Email sent:', response.data);
+        return {
+            statusCode: 200,
+            body: JSON.stringify({ message: 'Email sent successfully', data: response.data })
+        };
+    } catch (error) {
+        console.error('Failed to send email:', error);
+        return {
+            statusCode: 500,
+            body: JSON.stringify({ message: 'Failed to send email', error: error.message })
+        };
     }
-
-    const response = await emailjs.send(service_id, template_id, template_params, user_id);
-
-    // Log EmailJS response
-    console.log('EmailJS response:', response);
-
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ message: 'Email sent successfully', response }),
-    };
-  } catch (error) {
-    console.error('Error occurred:', error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ message: 'Failed to send email', error: error.toString() }),
-    };
-  }
 };
