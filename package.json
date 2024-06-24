@@ -8,8 +8,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
     "emailjs-com": "^3.2.0"
-  }
+  },
+  "devDependencies": {},
+  "description": ""
 }

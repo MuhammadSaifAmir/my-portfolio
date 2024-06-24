@@ -96,27 +96,41 @@
         }
         document.getElementById('form').addEventListener('submit', function(event) {
             event.preventDefault();
-    
-            var formData = new FormData(this);
-            var jsonData = {};
-            formData.forEach((value, key) => jsonData[key] = value);
-    
+          
+            const templateParams = {
+              from_name: `${document.getElementById('firstName').value} ${document.getElementById('lastName').value}`,
+              from_email: document.getElementById('email').value,
+              message: document.getElementById('msg').value,
+              age: document.getElementById('age').value,
+              education: document.querySelector('input[name="background"]:checked').value,
+              field_of_interest: document.getElementById('field').value,
+              programming_skills: Array.from(document.querySelectorAll('input.skill:checked')).map(skill => skill.value).join(', ')
+            };
+          
             fetch('/.netlify/functions/sendemail', {
-                method: 'POST',
-                body: JSON.stringify(jsonData),
-                headers: { 'Content-Type': 'application/json' }
+              method: 'POST',
+              body: JSON.stringify({
+                service_id: process.env.EMAILJS_SERVICE_ID,
+                template_id: process.env.EMAILJS_TEMPLATE_ID,
+                user_id: process.env.EMAILJS_USER_ID,
+                template_params: templateParams
+              })
             })
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
-                    alert('Email sent successfully!');
-                    document.getElementById('form').reset();
-                } else {
-                    alert('Failed to send email. Error: ' + JSON.stringify(data.error));
-                }
+              if (data.status === 'success') {
+                alert('Email sent successfully!');
+                document.getElementById('form').reset();
+              } else {
+                alert('Failed to send email. Error: ' + data.message);
+              }
             })
-            .catch(error => alert('Failed to send email. Error: ' + JSON.stringify(error)));
-        });
+            .catch(error => {
+              console.error('Error:', error);
+              alert('Failed to send email.');
+            });
+          });
     </script>
+    
 </body>
 </html>
