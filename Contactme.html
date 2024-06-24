@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Me</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+<body>
+    <section id="contactme">
+        <h1 id="demo"></h1>
+        <form id="form">
+            <!-- Personal Information Fields -->
+            <fieldset>
+                <legend><strong>Personal Information</strong></legend>
+                <!-- First Name -->
+                <p>
+                    <label for="firstName" class="xyz">First Name</label>
+                    <input type="text" name="firstName" id="firstName" placeholder="Saif" required>
+                </p>
+                <!-- Last Name -->
+                <p>
+                    <label for="lastName" class="xyz">Last Name</label>
+                    <input type="text" name="lastName" id="lastName" placeholder="Amir">
+                </p>
+                <!-- Email -->
+                <p>
+                    <label for="email" class="xyz">Email</label>
+                    <input type="email" name="email" id="email" placeholder="saifamir1895@gmail.com" required>
+                </p>
+                <!-- Age -->
+                <p>
+                    <label for="age" class="xy">Age</label>
+                    <input type="number" name="age" id="age" value="00" min="1" max="100" step="1" pattern="[0-9]{2}">
+                </p>
+            </fieldset>
+
+            <!-- Career Information Fields -->
+            <fieldset>
+                <legend><strong>Career Information</strong></legend>
+                <!-- Educational Background -->
+                <p>Educational Background</p>
+                <input type="radio" name="background" class="edu" id="student" value="Student" required>
+                <label for="student">Student</label>
+                <input type="radio" name="background" class="edu" id="graduate" value="Graduate" required>
+                <label for="graduate">Graduate</label>
+                <input type="radio" name="background" class="edu" id="postGraduate" value="Post Graduate" required>
+                <label for="postGraduate">Post Graduate</label>
+                <!-- Field of Interest -->
+                <p><label for="field">Field of Interest</label></p>
+                <select name="field" id="field" required>
+                    <optgroup label="Front-End">
+                        <option value="Web Developer">Web Developer</option>
+                        <option value="Web Designer">Web Designer</option>
+                        <option value="UI/UX Designer">UI/UX Designer</option>
+                    </optgroup>
+                    <optgroup label="Back-End">
+                        <option value="Database Developer">Database Developer</option>
+                        <option value="Back-end Developer">Back-end Developer</option>
+                    </optgroup>
+                    <option value="Other">Other</option>
+                </select>
+                <!-- Programming Skills -->
+                <p>Programming Skills</p>
+                <input type="checkbox" name="html" class="skill" id="html" value="html">
+                <label for="html">HTML</label>
+                <input type="checkbox" name="css" class="skill" id="css" value="css">
+                <label for="css">CSS</label>
+                <input type="checkbox" name="js" class="skill" id="js" value="js">
+                <label for="js">JavaScript</label>
+                <input type="checkbox" name="python" class="skill" id="python" value="python">
+                <label for="python">Python</label>
+                <input type="checkbox" name="java" class="skill" id="java" value="java">
+                <label for="java">Java</label>
+                <input type="checkbox" name="php" class="skill" id="php" value="php">
+                <label for="php">PHP</label>
+            </fieldset>
+
+            <!-- Message Field -->
+            <fieldset>
+                <legend><strong>Send me a message</strong></legend>
+                <textarea name="msg" id="msg" cols="80" rows="10" placeholder="Hello World!"></textarea>
+            </fieldset>
+
+            <button type="submit">Send Email</button>
+            <input type="Reset" value="Reset">
+        </form>
+    </section>
+
+    <footer>&copy; Muhammad Saif Amir Sahik</footer>
+    
+    <script>
+        const myTimeout = setTimeout(myGreeting, 5000);
+        function myGreeting() {
+            document.getElementById("demo").innerHTML = "Contact Me"
+        }
+        document.getElementById('form').addEventListener('submit', function(event) {
+            event.preventDefault();
+    
+            var formData = new FormData(this);
+            var jsonData = {};
+            formData.forEach((value, key) => jsonData[key] = value);
+    
+            fetch('/.netlify/functions/sendemail', {
+                method: 'POST',
+                body: JSON.stringify(jsonData),
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Email sent successfully!');
+                    document.getElementById('form').reset();
+                } else {
+                    alert('Failed to send email. Error: ' + JSON.stringify(data.error));
+                }
+            })
+            .catch(error => alert('Failed to send email. Error: ' + JSON.stringify(error)));
+        });
+    </script>
+</body>
+</html>
